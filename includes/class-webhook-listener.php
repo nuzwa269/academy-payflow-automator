@@ -10,8 +10,11 @@ class APFA_Webhook_Listener {
         add_action( 'wp_ajax_apfa_submit_fee', array( $this, 'handle_fee_submission' ) );
         add_action( 'wp_ajax_nopriv_apfa_submit_fee', array( $this, 'handle_fee_submission' ) );
         add_action( 'wp_ajax_apfa_get_student_data', array( $this, 'get_student_data' ) );
+        add_action( 'wp_ajax_nopriv_apfa_get_student_data', array( $this, 'get_student_data' ) );
         add_action( 'wp_ajax_apfa_get_transactions', array( $this, 'get_transactions' ) );
+        add_action( 'wp_ajax_nopriv_apfa_get_transactions', array( $this, 'get_transactions' ) );
         add_action( 'wp_ajax_apfa_download_receipt', array( $this, 'download_receipt' ) );
+        add_action( 'wp_ajax_nopriv_apfa_download_receipt', array( $this, 'download_receipt' ) );
     }
 
     public function register_webhook_endpoint() {
@@ -163,6 +166,10 @@ class APFA_Webhook_Listener {
         $prefix = $wpdb->prefix . 'apfa_';
 
         $current_user_id = get_current_user_id();
+        if ( ! $current_user_id ) {
+            wp_send_json_error( __( 'Not logged in', 'apfa' ) );
+        }
+
         $student = $wpdb->get_row(
             $wpdb->prepare( "SELECT * FROM {$prefix}students WHERE User_ID = %d", $current_user_id )
         );
@@ -196,6 +203,10 @@ class APFA_Webhook_Listener {
         $prefix = $wpdb->prefix . 'apfa_';
 
         $current_user_id = get_current_user_id();
+        if ( ! $current_user_id ) {
+            wp_send_json_error( __( 'Not logged in', 'apfa' ) );
+        }
+
         $student = $wpdb->get_row(
             $wpdb->prepare( "SELECT Phone FROM {$prefix}students WHERE User_ID = %d", $current_user_id )
         );

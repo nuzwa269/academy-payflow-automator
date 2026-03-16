@@ -792,3 +792,17 @@ body.apfa-urdu .profile-field label {
         border: 1px solid #000;
     }
 }
+
+/* ===== PORTAL FOOTER ===== */
+.apfa-portal-footer {
+    background: var(--text-dark);
+    color: #9ca3af;
+    text-align: center;
+    padding: 14px 20px;
+    font-size: 13px;
+    margin-top: auto;
+}
+
+/* ===== FORM MESSAGE ===== */
+#fee-form-msg .apfa-success { color: #10b981; font-weight: 600; }
+#fee-form-msg .apfa-error   { color: #ef4444; font-weight: 600; }

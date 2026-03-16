@@ -12,8 +12,6 @@ class APFA_Frontend_Dashboard {
     }
 
     public function hijack_portal_page() {
-        global $post;
-        
         if ( is_page( 'payflow-portal' ) && ! is_admin() ) {
             include APFA_PLUGIN_DIR . 'public/dashboard-template-new.php';
             exit;
@@ -29,10 +27,9 @@ class APFA_Frontend_Dashboard {
     public function enqueue_assets() {
         if ( is_page( 'payflow-portal' ) ) {
             wp_enqueue_style( 'apfa-dashboard', APFA_PLUGIN_URL . 'assets/style.css', array(), APFA_VERSION );
-            
-            wp_enqueue_script( 'apfa-datatables', 'https://cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js', array( 'jquery' ), '1.13.1', true );
-            wp_enqueue_style( 'apfa-datatables', 'https://cdn.datatables.net/1.13.1/css/jquery.dataTables.min.css' );
-            wp_enqueue_script( 'apfa-dashboard', APFA_PLUGIN_URL . 'assets/script.js', array( 'jquery', 'apfa-datatables' ), APFA_VERSION, true );
+            wp_enqueue_style( 'apfa-dashboard-modern', APFA_PLUGIN_URL . 'public/dashboard-modern.css', array( 'apfa-dashboard' ), APFA_VERSION );
+
+            wp_enqueue_script( 'apfa-dashboard', APFA_PLUGIN_URL . 'assets/script.js', array( 'jquery' ), APFA_VERSION, true );
 
             wp_localize_script( 'apfa-dashboard', 'apfaConfig', array(
                 'ajax_url' => admin_url( 'admin-ajax.php' ),
@@ -40,7 +37,7 @@ class APFA_Frontend_Dashboard {
                 'i18n'     => array(
                     'payment_submitted' => __( 'Payment Submitted', 'apfa' ),
                     'payment_success'   => __( 'Your payment has been submitted for verification.', 'apfa' ),
-                )
+                ),
             ) );
         }
     }

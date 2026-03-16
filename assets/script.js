@@ -5,498 +5,370 @@
 
 console.log('PayFlow Automator script loaded!');
 
-(function() {
+(function ($) {
     'use strict';
 
+    // Config injected by wp_localize_script
+    var AJAX_URL = (typeof apfaConfig !== 'undefined') ? apfaConfig.ajax_url : '';
+    var NONCE    = (typeof apfaConfig !== 'undefined') ? apfaConfig.nonce    : '';
+
     // Configuration
-    const CONFIG = {
+    var CONFIG = {
         debug: true,
         animationDuration: 300,
     };
 
     // Utility functions
-    const Utils = {
-        log: function(message, data) {
-            if (CONFIG.debug) {
+    var Utils = {
+        log: function (message, data) {
+            if (CONFIG.debug && window.console) {
                 console.log('[PayFlow] ' + message, data || '');
             }
         },
-        
-        error: function(message, data) {
-            console.error('[PayFlow Error] ' + message, data || '');
+
+        error: function (message, data) {
+            if (window.console) {
+                console.error('[PayFlow Error] ' + message, data || '');
+            }
         },
 
-        formatCurrency: function(amount, currency = 'PKR') {
-            return currency + ' ' + parseFloat(amount).toLocaleString();
+        formatCurrency: function (amount) {
+            return 'PKR ' + parseFloat(amount).toLocaleString('en-PK', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         },
 
-        formatDate: function(dateStr) {
-            if (!dateStr) return '-';
-            const date = new Date(dateStr);
-            return date.toLocaleDateString('en-GB', {
-                day: '2-digit',
-                month: 'short',
-                year: 'numeric'
-            });
+        formatDate: function (dateStr) {
+            if (!dateStr) return '—';
+            var d = new Date(dateStr);
+            if (isNaN(d.getTime())) return dateStr;
+            return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
         },
-
-        getQueryParam: function(param) {
-            const urlParams = new URLSearchParams(window.location.search);
-            return urlParams.get(param);
-        },
-
-        debounce: function(func, wait) {
-            let timeout;
-            return function executedFunction(...args) {
-                const later = () => {
-                    clearTimeout(timeout);
-                    func(...args);
-                };
-                clearTimeout(timeout);
-                timeout = setTimeout(later, wait);
-            };
-        }
     };
 
     // Storage Manager
-    const Storage = {
-        set: function(key, value) {
-            try {
-                localStorage.setItem('apfa_' + key, JSON.stringify(value));
-                Utils.log('Storage set: ' + key);
-            } catch (e) {
-                Utils.error('Storage set failed', e);
-            }
+    var Storage = {
+        set: function (key, value) {
+            try { localStorage.setItem('apfa_' + key, JSON.stringify(value)); } catch (e) {}
         },
-
-        get: function(key) {
-            try {
-                const value = localStorage.getItem('apfa_' + key);
-                return value ? JSON.parse(value) : null;
-            } catch (e) {
-                Utils.error('Storage get failed', e);
-                return null;
-            }
+        get: function (key) {
+            try { var v = localStorage.getItem('apfa_' + key); return v ? JSON.parse(v) : null; } catch (e) { return null; }
         },
-
-        remove: function(key) {
-            try {
-                localStorage.removeItem('apfa_' + key);
-                Utils.log('Storage removed: ' + key);
-            } catch (e) {
-                Utils.error('Storage remove failed', e);
-            }
-        },
-
-        clear: function() {
-            try {
-                const keys = Object.keys(localStorage);
-                keys.forEach(key => {
-                    if (key.startsWith('apfa_')) {
-                        localStorage.removeItem(key);
-                    }
-                });
-                Utils.log('Storage cleared');
-            } catch (e) {
-                Utils.error('Storage clear failed', e);
-            }
-        }
     };
 
-    // Theme Manager
-    const Theme = {
-        current: Storage.get('theme') || 'light',
-
-        init: function() {
-            this.apply(this.current);
-            this.bindEvents();
-        },
-
-        bindEvents: function() {
-            document.querySelectorAll('[data-theme]').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const theme = e.target.dataset.theme;
-                    this.set(theme);
-                });
-            });
-        },
-
-        set: function(theme) {
-            this.current = theme;
-            this.apply(theme);
-            Storage.set('theme', theme);
-            Utils.log('Theme changed to: ' + theme);
-        },
-
-        apply: function(theme) {
-            if (theme === 'dark') {
-                document.body.classList.add('dark-mode');
-                document.documentElement.setAttribute('data-theme', 'dark');
-            } else {
-                document.body.classList.remove('dark-mode');
-                document.documentElement.setAttribute('data-theme', 'light');
-            }
-        }
-    };
-
-    // Navigation Manager
-    const Navigation = {
+    /* ============================================================
+       NAVIGATION
+    ============================================================ */
+    var Navigation = {
         activeSection: 'dashboard',
 
-        init: function() {
+        init: function () {
             this.bindEvents();
-            this.restoreActive();
+            var saved = Storage.get('active_section');
+            if (saved) { this.switchTo(saved); }
         },
 
-        bindEvents: function() {
-            document.querySelectorAll('.nav-link').forEach(link => {
-                link.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const section = link.dataset.section;
-                    if (section) {
-                        this.switchTo(section);
-                    }
-                });
+        bindEvents: function () {
+            $(document).on('click', '.nav-link', function (e) {
+                e.preventDefault();
+                var section = $(this).data('section');
+                if (section) { Navigation.switchTo(section); }
             });
         },
 
-        switchTo: function(section) {
+        switchTo: function (section) {
             if (section === this.activeSection) return;
-
-            // Hide current section
-            const current = document.getElementById(this.activeSection);
-            if (current) {
-                current.classList.remove('active');
-            }
-
-            // Show new section
-            const next = document.getElementById(section);
-            if (next) {
-                next.classList.add('active');
+            $('#' + this.activeSection).removeClass('active');
+            var $next = $('#' + section);
+            if ($next.length) {
+                $next.addClass('active');
                 this.activeSection = section;
                 Storage.set('active_section', section);
-                Utils.log('Section switched to: ' + section);
                 window.scrollTo(0, 0);
             }
         },
-
-        restoreActive: function() {
-            const saved = Storage.get('active_section');
-            if (saved) {
-                this.switchTo(saved);
-            }
-        }
     };
 
-    // Language Manager
-    const Language = {
+    /* ============================================================
+       LANGUAGE
+    ============================================================ */
+    var Language = {
         current: Storage.get('language') || 'en',
 
-        init: function() {
+        init: function () {
             this.apply(this.current);
-            this.bindEvents();
-        },
-
-        bindEvents: function() {
-            document.querySelectorAll('.lang-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const lang = btn.dataset.lang;
-                    this.set(lang);
-                });
+            $(document).on('click', '.lang-btn', function (e) {
+                e.preventDefault();
+                Language.set($(this).data('lang'));
             });
         },
 
-        set: function(lang) {
+        set: function (lang) {
             this.current = lang;
             this.apply(lang);
             Storage.set('language', lang);
-            Utils.log('Language changed to: ' + lang);
         },
 
-        apply: function(lang) {
+        apply: function (lang) {
             if (lang === 'ur') {
-                document.body.classList.add('apfa-urdu');
-                document.body.dir = 'rtl';
-                document.documentElement.lang = 'ur';
+                $('body').addClass('apfa-urdu').attr('dir', 'rtl');
+                $('html').attr('lang', 'ur');
             } else {
-                document.body.classList.remove('apfa-urdu');
-                document.body.dir = 'ltr';
-                document.documentElement.lang = 'en';
+                $('body').removeClass('apfa-urdu').attr('dir', 'ltr');
+                $('html').attr('lang', 'en');
             }
-        }
+        },
     };
 
-    // Form Manager
-    const Form = {
-        init: function() {
-            this.bindEvents();
+    /* ============================================================
+       STUDENT DATA — Load from server
+    ============================================================ */
+    var StudentData = {
+        data: null,
+
+        load: function () {
+            if (!AJAX_URL) return;
+            $.post(AJAX_URL, { action: 'apfa_get_student_data', nonce: NONCE }, function (res) {
+                if (res.success) {
+                    StudentData.data = res.data;
+                    StudentData.populate(res.data);
+                } else {
+                    Utils.log('Student not found or not logged in');
+                }
+            }).fail(function () {
+                Utils.error('Failed to load student data');
+            });
         },
 
-        bindEvents: function() {
-            const form = document.getElementById('fee-submission-form');
-            if (form) {
-                form.addEventListener('submit', this.handleSubmit.bind(this));
-            }
+        populate: function (student) {
+            // Fee form
+            $('#student-name-readonly').val(student.full_name || '');
+            $('#student-phone-readonly').val(student.phone    || '');
 
-            // File input
-            const fileInput = document.getElementById('receipt-image');
-            if (fileInput) {
-                fileInput.addEventListener('change', this.handleFileChange.bind(this));
-            }
+            // Receipt preview
+            $('#receipt-student').text(student.full_name || '—');
+            $('#receipt-phone').text(student.phone    || '—');
 
-            // Amount input
-            const amountInput = document.getElementById('amount');
-            if (amountInput) {
-                amountInput.addEventListener('input', this.handleAmountChange.bind(this));
+            // Profile section
+            $('#profile-name').text(student.full_name   || '—');
+            $('#profile-phone').text(student.phone      || '—');
+            $('#profile-course').text(student.course_name || '—');
+            $('#profile-total-fee').text(Utils.formatCurrency(student.total_fee  || 0));
+            $('#profile-balance').text(Utils.formatCurrency(student.balance    || 0));
+            $('#profile-enrolled').text(Utils.formatDate(student.created_at   || ''));
+
+            if (student.full_name) {
+                $('#profile-not-linked').hide();
+                $('#profile-grid').show();
+            } else {
+                $('#profile-not-linked').show();
+                $('#profile-grid').hide();
             }
         },
+    };
 
-        handleSubmit: function(e) {
+    /* ============================================================
+       TRANSACTIONS — Load from server
+    ============================================================ */
+    var Transactions = {
+        load: function () {
+            if (!AJAX_URL) return;
+            $.post(AJAX_URL, { action: 'apfa_get_transactions', nonce: NONCE }, function (res) {
+                if (res.success) {
+                    Transactions.render(res.data);
+                } else {
+                    $('#history-empty').show();
+                }
+            }).fail(function () {
+                Utils.error('Failed to load transactions');
+            });
+        },
+
+        statusBadge: function (status) {
+            var colors = { Pending: '#f59e0b', Verified: '#10b981', Rejected: '#ef4444' };
+            var color  = colors[status] || '#6b7280';
+            return '<span style="background:' + color + ';color:#fff;padding:2px 8px;border-radius:12px;font-size:12px;">' + status + '</span>';
+        },
+
+        render: function (submissions) {
+            var rows     = '';
+            var recentRows = '';
+            var count    = 0;
+
+            if (!submissions || submissions.length === 0) {
+                $('#history-empty').show();
+                return;
+            }
+
+            $.each(submissions, function (i, sub) {
+                var receipt = sub.receipt
+                    ? '<a href="' + sub.receipt + '" target="_blank">View</a>'
+                    : '—';
+
+                var row = '<tr>' +
+                    '<td>' + sub.date + '</td>' +
+                    '<td><code>' + (sub.trx_id || '—') + '</code></td>' +
+                    '<td>' + Utils.formatCurrency(sub.amount) + '</td>' +
+                    '<td>' + Transactions.statusBadge(sub.status) + '</td>' +
+                    '<td>' + receipt + '</td>' +
+                    '</tr>';
+
+                rows += row;
+                if (count < 5) {
+                    recentRows += row;
+                    count++;
+                }
+            });
+
+            $('#history-tbody').html(rows);
+            $('#recent-transactions').html(recentRows);
+            $('#history-empty').hide();
+        },
+    };
+
+    /* ============================================================
+       FEE SUBMISSION FORM
+    ============================================================ */
+    var Form = {
+        init: function () {
+            $('#fee-submission-form').on('submit', Form.handleSubmit);
+
+            // Update receipt preview when amount changes
+            $('#amount').on('input', function () {
+                var amount = parseFloat($(this).val()) || 0;
+                $('#receipt-amount').text('PKR ' + amount.toFixed(2));
+                $('#receipt-total').text('PKR ' + amount.toFixed(2));
+            });
+
+            // Update receipt preview when fee type changes
+            $('[name="fee_type"]').on('change', function () {
+                var selected = $(this).val();
+                if (selected && selected !== 'Select Fee Type') {
+                    $('#receipt-fee-type').text(selected);
+                }
+            });
+
+            // Update receipt trx_id preview
+            $('#trx-id').on('input', function () {
+                $('#receipt-trx').text('Trx ID: ' + ($(this).val() || '—'));
+            });
+
+            // File name display
+            $('#receipt-image').on('change', function () {
+                var file = this.files[0];
+                $('#file-name').text(file ? file.name : 'No file chosen');
+            });
+        },
+
+        handleSubmit: function (e) {
             e.preventDefault();
-            Utils.log('Form submitted');
+            var $form = $(this);
+            var $btn  = $form.find('[type="submit"]');
+            var $msg  = $('#fee-form-msg');
 
-            const form = e.target;
-            const amount = form.querySelector('#amount').value;
-            const file = form.querySelector('#receipt-image').files[0];
+            var studentPhone = $('#student-phone-readonly').val().trim();
+            var trxId        = $('#trx-id').val().trim();
+            var amount       = parseFloat($('#amount').val()) || 0;
 
-            if (!amount || amount <= 0) {
-                this.showError('Please enter a valid amount');
+            if (!studentPhone) {
+                $msg.html('<span class="apfa-error">Please log in with a linked student account.</span>');
+                return;
+            }
+            if (!trxId) {
+                $msg.html('<span class="apfa-error">Transaction ID is required.</span>');
+                return;
+            }
+            if (amount <= 0) {
+                $msg.html('<span class="apfa-error">Please enter a valid amount.</span>');
                 return;
             }
 
-            if (!file) {
-                this.showError('Please select a receipt image');
-                return;
-            }
+            var formData = new FormData($form[0]);
+            formData.append('action', 'apfa_submit_fee');
+            formData.append('nonce', NONCE || $('#apfa-nonce').val());
+            formData.append('student_phone', studentPhone);
+            formData.append('trx_id', trxId);
+            formData.append('amount', amount);
 
-            this.showSuccess('Payment submitted successfully');
-            form.reset();
-            document.getElementById('file-name').textContent = 'No file chosen';
+            $btn.prop('disabled', true).text('Submitting…');
+            $msg.html('');
 
-            // Reset after 2 seconds
-            setTimeout(() => {
-                form.reset();
-            }, 2000);
-        },
-
-        handleFileChange: function(e) {
-            const file = e.target.files[0];
-            const fileName = file ? file.name : 'No file chosen';
-            const fileNameElement = document.getElementById('file-name');
-            if (fileNameElement) {
-                fileNameElement.textContent = fileName;
-            }
-            Utils.log('File selected: ' + fileName);
-        },
-
-        handleAmountChange: function(e) {
-            const amount = parseFloat(e.target.value) || 0;
-            const receiptAmount = document.getElementById('receipt-amount');
-            const receiptTotal = document.getElementById('receipt-total');
-            
-            if (receiptAmount) {
-                receiptAmount.textContent = '$' + amount.toFixed(2);
-            }
-            if (receiptTotal) {
-                receiptTotal.textContent = '$' + (amount + 30).toFixed(2);
-            }
-        },
-
-        showError: function(message) {
-            alert('Error: ' + message);
-            Utils.error(message);
-        },
-
-        showSuccess: function(message) {
-            const modal = document.getElementById('success-modal');
-            if (modal) {
-                modal.classList.add('show');
-                Utils.log(message);
-                
-                setTimeout(() => {
-                    modal.classList.remove('show');
-                }, 3000);
-            }
-        }
-    };
-
-    // Modal Manager
-    const Modal = {
-        init: function() {
-            this.bindEvents();
-        },
-
-        bindEvents: function() {
-            // Close modal when clicking on close button
-            document.querySelectorAll('[data-close-modal]').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const modal = e.target.closest('.modal');
-                    if (modal) {
-                        this.close(modal);
+            $.ajax({
+                url:         AJAX_URL,
+                type:        'POST',
+                data:        formData,
+                processData: false,
+                contentType: false,
+                success: function (res) {
+                    if (res.success) {
+                        $('#success-modal').addClass('show');
+                        $form[0].reset();
+                        $('#file-name').text('No file chosen');
+                        $msg.html('');
+                        // Reload transactions
+                        Transactions.load();
+                    } else {
+                        var errMsg = res.data || 'Submission failed.';
+                        $('#error-modal-msg').text(errMsg);
+                        $('#error-modal').addClass('show');
                     }
-                });
-            });
-
-            // Close modal when clicking outside
-            document.querySelectorAll('.modal').forEach(modal => {
-                modal.addEventListener('click', (e) => {
-                    if (e.target === modal) {
-                        this.close(modal);
-                    }
-                });
+                },
+                error: function () {
+                    $msg.html('<span class="apfa-error">Server error. Please try again.</span>');
+                },
+                complete: function () {
+                    $btn.prop('disabled', false).text('Submit Payment');
+                },
             });
         },
-
-        close: function(modal) {
-            modal.classList.remove('show');
-            Utils.log('Modal closed');
-        }
     };
 
-    // Notification Manager
-    const Notification = {
-        show: function(message, type = 'info', duration = 3000) {
-            const notification = document.createElement('div');
-            notification.className = 'notification notification-' + type;
-            notification.textContent = message;
-            notification.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                background: ${type === 'error' ? '#ef4444' : type === 'success' ? '#10b981' : '#2563eb'};
-                color: white;
-                padding: 15px 20px;
-                border-radius: 6px;
-                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-                z-index: 9999;
-                animation: slideIn 0.3s ease;
-            `;
-            
-            document.body.appendChild(notification);
-
-            setTimeout(() => {
-                notification.remove();
-            }, duration);
-
-            Utils.log('Notification shown: ' + message);
-        }
-    };
-
-    // Analytics
-    const Analytics = {
-        init: function() {
-            this.trackPageView();
-            this.bindEvents();
-        },
-
-        trackPageView: function() {
-            Utils.log('Page viewed: ' + window.location.pathname);
-        },
-
-        trackEvent: function(category, action, label) {
-            Utils.log('Event tracked', {
-                category: category,
-                action: action,
-                label: label
+    /* ============================================================
+       MODALS
+    ============================================================ */
+    var Modal = {
+        init: function () {
+            $(document).on('click', '.modal', function (e) {
+                if (e.target === this) { $(this).removeClass('show'); }
             });
         },
-
-        bindEvents: function() {
-            document.querySelectorAll('[data-track]').forEach(el => {
-                el.addEventListener('click', (e) => {
-                    const track = el.dataset.track;
-                    if (track) {
-                        this.trackEvent('user_interaction', 'click', track);
-                    }
-                });
-            });
-        }
     };
 
-    // Performance Monitor
-    const Performance = {
-        init: function() {
-            this.logMetrics();
-        },
+    /* ============================================================
+       INITIALISE
+    ============================================================ */
+    function init() {
+        Utils.log('Initializing PayFlow Automator');
+        Language.init();
+        Navigation.init();
+        Form.init();
+        Modal.init();
+        StudentData.load();
+        Transactions.load();
+        Utils.log('PayFlow Automator initialized successfully');
+    }
 
-        logMetrics: function() {
-            if (window.performance && window.performance.timing) {
-                const timing = window.performance.timing;
-                const loadTime = timing.loadEventEnd - timing.navigationStart;
-                const connectTime = timing.responseEnd - timing.requestStart;
-                
-                Utils.log('Performance Metrics', {
-                    loadTime: loadTime + 'ms',
-                    connectTime: connectTime + 'ms'
-                });
-            }
-        }
+    $(document).ready(init);
+
+    /* ============================================================
+       GLOBAL HELPERS (used inline by template)
+    ============================================================ */
+    window.switchSection = function (e, section) {
+        if (e && e.preventDefault) e.preventDefault();
+        Navigation.switchTo(section);
     };
 
-    // Initialize app
-    const App = {
-        init: function() {
-            Utils.log('Initializing PayFlow Automator');
-            
-            Theme.init();
-            Language.init();
-            Navigation.init();
-            Form.init();
-            Modal.init();
-            Analytics.init();
-            Performance.init();
-            
-            Utils.log('PayFlow Automator initialized successfully');
-        }
+    window.closeModal = function (modalId) {
+        $('#' + modalId).removeClass('show');
     };
 
-    // Start app when DOM is ready
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', () => {
-            App.init();
-        });
-    } else {
-        App.init();
-    }
-
-    // Expose to global for debugging
-    window.PayFlow = {
-        Utils: Utils,
-        Storage: Storage,
-        Theme: Theme,
-        Language: Language,
-        Navigation: Navigation,
-        Form: Form,
-        Modal: Modal,
-        Notification: Notification,
-        Analytics: Analytics
+    window.changeLang = function (e, lang) {
+        if (e && e.preventDefault) e.preventDefault();
+        Language.set(lang);
     };
 
-})();
+    // Expose for debugging
+    window.PayFlow = { Utils: Utils, Storage: Storage, Navigation: Navigation, Form: Form, Modal: Modal };
 
-// Global helper functions
-window.switchSection = function(e, section) {
-    e.preventDefault();
-    const PayFlow = window.PayFlow;
-    if (PayFlow && PayFlow.Navigation) {
-        PayFlow.Navigation.switchTo(section);
-    }
-};
-
-window.closeModal = function(modalId) {
-    const modal = document.getElementById(modalId);
-    if (modal) {
-        modal.classList.remove('show');
-    }
-};
-
-window.changeLang = function(e, lang) {
-    e.preventDefault();
-    const PayFlow = window.PayFlow;
-    if (PayFlow && PayFlow.Language) {
-        PayFlow.Language.set(lang);
-    }
-};
+}(jQuery));
 
 console.log('PayFlow Automator - All systems ready! ✓');
+
