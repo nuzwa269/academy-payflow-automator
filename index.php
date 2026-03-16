@@ -1,14 +1,18 @@
 <?php
 /**
- * Plugin Name: Academy PayFlow Automator
- * Description: A plugin to automate payment flows for the Academy.
- * Version: 1.0.0
- * Author: Your Name
- **/
+ * Academy PayFlow Automator - Index File
+ * Security: Prevent direct access to plugin directory
+ */
 
-// Your code goes here
-
-function payflow_automate() {
-    // Automation logic here
+// Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+    exit( 'Direct access not permitted.' );
 }
-add_action('init', 'payflow_automate');
+
+/**
+ * This file is a security measure
+ * It prevents directory listing and direct access
+ */
+
+// Load the main plugin file
+require_once dirname( dirname( __FILE__ ) ) . '/academy-payflow-automator.php';
