@@ -2,18 +2,14 @@
 /**
  * Plugin Name: Academy PayFlow Automator
  * Plugin URI: https://github.com/nuzwa269/academy-payflow-automator
- * Description: Automated academy fee management with SMS webhook integration, transaction matching, and PDF receipts
+ * Description: Automated academy fee management with SMS webhook integration
  * Version: 1.0.0
  * Author: Coach Pro AI
- * Author URI: https://coachproai.com
  * License: GPL-2.0+
- * License URI: https://www.gnu.org/licenses/gpl-2.0.txt
  * Text Domain: apfa
  * Domain Path: /languages
  * Requires at least: 5.9
  * Requires PHP: 7.4
- * Tested up to: 6.4
- * Network: false
  */
 
 // Exit if accessed directly
@@ -21,34 +17,27 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit( 'Direct access not permitted.' );
 }
 
-// Define plugin constants
-if ( ! defined( 'APFA_PLUGIN_DIR' ) ) {
-    define( 'APFA_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
+// Define constants
+define( 'APFA_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
+define( 'APFA_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
+define( 'APFA_VERSION', '1.0.0' );
+define( 'APFA_PLUGIN_BASENAME', plugin_basename( __FILE__ ) );
+
+// Enable error logging
+if ( ! defined( 'WP_DEBUG' ) ) {
+    define( 'WP_DEBUG', true );
+}
+if ( ! defined( 'WP_DEBUG_LOG' ) ) {
+    define( 'WP_DEBUG_LOG', true );
 }
 
-if ( ! defined( 'APFA_PLUGIN_URL' ) ) {
-    define( 'APFA_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
-}
-
-if ( ! defined( 'APFA_VERSION' ) ) {
-    define( 'APFA_VERSION', '1.0.0' );
-}
-
-if ( ! defined( 'APFA_PLUGIN_BASENAME' ) ) {
-    define( 'APFA_PLUGIN_BASENAME', plugin_basename( __FILE__ ) );
-}
-
-/**
- * Load plugin text domain for translations
- */
+// Load text domain
 add_action( 'plugins_loaded', function() {
     load_plugin_textdomain( 'apfa', false, dirname( APFA_PLUGIN_BASENAME ) . '/languages' );
 }, 9 );
 
-/**
- * Load required files
- */
-$files = array(
+// Load required files
+$required_files = array(
     'includes/class-database.php',
     'includes/class-activator.php',
     'includes/class-deactivator.php',
@@ -59,66 +48,39 @@ $files = array(
     'public/class-frontend-dashboard.php',
 );
 
-foreach ( $files as $file ) {
-    if ( file_exists( APFA_PLUGIN_DIR . $file ) ) {
-        require_once APFA_PLUGIN_DIR . $file;
+foreach ( $required_files as $file ) {
+    $filepath = APFA_PLUGIN_DIR . $file;
+    if ( file_exists( $filepath ) ) {
+        require_once $filepath;
+    } else {
+        error_log( 'APFA: Missing file - ' . $file );
     }
 }
 
-/**
- * Register plugin activation hook
- */
+// Register activation/deactivation
 register_activation_hook( __FILE__, array( 'APFA_Activator', 'activate' ) );
-
-/**
- * Register plugin deactivation hook
- */
 register_deactivation_hook( __FILE__, array( 'APFA_Deactivator', 'deactivate' ) );
 
-/**
- * Initialize plugin on WordPress init hook
- */
+// Initialize plugin
 add_action( 'init', function() {
-    // Initialize admin
-    if ( is_admin() ) {
-        new APFA_Admin_Settings();
+    try {
+        if ( is_admin() ) {
+            new APFA_Admin_Settings();
+        }
+        
+        if ( ! is_admin() || defined( 'DOING_AJAX' ) ) {
+            new APFA_Frontend_Dashboard();
+        }
+        
+        new APFA_Webhook_Listener();
+    } catch ( Exception $e ) {
+        error_log( 'APFA Error: ' . $e->getMessage() );
     }
-
-    // Initialize frontend
-    if ( ! is_admin() || defined( 'DOING_AJAX' ) ) {
-        new APFA_Frontend_Dashboard();
-    }
-
-    // Initialize webhook listener
-    new APFA_Webhook_Listener();
 }, 10 );
 
-/**
- * Display admin notice if WordPress version is too old
- */
-add_action( 'admin_notices', function() {
-    global $wp_version;
-    if ( version_compare( $wp_version, '5.9', '<' ) ) {
-        echo '<div class="notice notice-error"><p>';
-        esc_html_e( 'Academy PayFlow Automator requires WordPress 5.9 or higher.', 'apfa' );
-        echo '</p></div>';
-    }
-    
-    if ( version_compare( PHP_VERSION, '7.4', '<' ) ) {
-        echo '<div class="notice notice-error"><p>';
-        esc_html_e( 'Academy PayFlow Automator requires PHP 7.4 or higher.', 'apfa' );
-        echo '</p></div>';
-    }
-} );
-
-/**
- * Add plugin action links
- */
+// Security headers
 add_filter( 'plugin_action_links_' . APFA_PLUGIN_BASENAME, function( $links ) {
-    $settings_link = '<a href="' . admin_url( 'admin.php?page=apfa-settings' ) . '">' .
-        esc_html__( 'Settings', 'apfa' ) . '</a>';
-    
+    $settings_link = '<a href="' . admin_url( 'admin.php?page=apfa-settings' ) . '">' . __( 'Settings', 'apfa' ) . '</a>';
     array_unshift( $links, $settings_link );
-    
     return $links;
 } );
