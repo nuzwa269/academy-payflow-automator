@@ -1,0 +1,93 @@
+/* ============================================
+   APFA Admin Styles
+   ============================================ */
+
+.apfa-admin-wrap h1 {
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+/* Stats Grid */
+.apfa-stats-grid {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+}
+
+.apfa-stat-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: #fff;
+    border-left: 5px solid #2563eb;
+    border-radius: 8px;
+    padding: 18px 24px;
+    flex: 1;
+    min-width: 180px;
+    box-shadow: 0 2px 6px rgba(0,0,0,.08);
+}
+
+.apfa-stat-card .dashicons {
+    font-size: 32px;
+    width: 32px;
+    height: 32px;
+    color: inherit;
+}
+
+.apfa-stat-blue  { border-color: #2563eb; color: #2563eb; }
+.apfa-stat-green { border-color: #10b981; color: #10b981; }
+.apfa-stat-orange{ border-color: #f59e0b; color: #f59e0b; }
+.apfa-stat-teal  { border-color: #0891b2; color: #0891b2; }
+
+.stat-value {
+    font-size: 22px;
+    font-weight: 700;
+    color: #1f2937;
+    line-height: 1.2;
+}
+
+.stat-label {
+    font-size: 13px;
+    color: #6b7280;
+}
+
+/* Cards */
+.apfa-card {
+    background: #fff;
+    border-radius: 8px;
+    padding: 20px 24px;
+    box-shadow: 0 2px 6px rgba(0,0,0,.08);
+    margin-bottom: 20px;
+}
+
+.apfa-card h2 {
+    font-size: 16px;
+    margin-bottom: 16px;
+    color: #1f2937;
+}
+
+/* Two Column Layout */
+.apfa-two-col {
+    display: grid;
+    grid-template-columns: 400px 1fr;
+    gap: 20px;
+    align-items: start;
+}
+
+@media (max-width: 1100px) {
+    .apfa-two-col {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Admission form feedback */
+#apfa-admission-msg .apfa-success {
+    color: #10b981;
+    font-weight: 600;
+}
+
+#apfa-admission-msg .apfa-error {
+    color: #ef4444;
+    font-weight: 600;
+}
