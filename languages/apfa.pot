@@ -1,3 +1,148 @@
-# Translation template
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Academy PayFlow Automator 1.0.0\n"
+"POT-Creation-Date: 2026-03-16 00:00:00+0000\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: en\n"
 
-This file contains all msgid strings used in the project.
+msgid "Dashboard"
+msgstr ""
+
+msgid "Submit Fee"
+msgstr ""
+
+msgid "History"
+msgstr ""
+
+msgid "Profile"
+msgstr ""
+
+msgid "Welcome Back"
+msgstr ""
+
+msgid "Monitor your academy fee payment status"
+msgstr ""
+
+msgid "Total Fee"
+msgstr ""
+
+msgid "Verified Payments"
+msgstr ""
+
+msgid "Pending Balance"
+msgstr ""
+
+msgid "Recent Transactions"
+msgstr ""
+
+msgid "Date"
+msgstr ""
+
+msgid "Transaction ID"
+msgstr ""
+
+msgid "Amount"
+msgstr ""
+
+msgid "Status"
+msgstr ""
+
+msgid "Submit Your Payment"
+msgstr ""
+
+msgid "Enter your transaction details"
+msgstr ""
+
+msgid "Amount (PKR)"
+msgstr ""
+
+msgid "Receipt Screenshot"
+msgstr ""
+
+msgid "Click to upload or drag & drop"
+msgstr ""
+
+msgid "Submit Payment"
+msgstr ""
+
+msgid "Payment History"
+msgstr ""
+
+msgid "All your submitted payments"
+msgstr ""
+
+msgid "Receipt"
+msgstr ""
+
+msgid "Student Profile"
+msgstr ""
+
+msgid "Your course information"
+msgstr ""
+
+msgid "Name"
+msgstr ""
+
+msgid "Phone"
+msgstr ""
+
+msgid "Course"
+msgstr ""
+
+msgid "Enrolled"
+msgstr ""
+
+msgid "Payment Submitted"
+msgstr ""
+
+msgid "Your payment has been submitted for verification."
+msgstr ""
+
+msgid "Done"
+msgstr ""
+
+msgid "Powered by Academy PayFlow | Designed by Coach Pro AI"
+msgstr ""
+
+msgid "Invalid input data"
+msgstr ""
+
+msgid "Failed to upload receipt image"
+msgstr ""
+
+msgid "Fee submitted successfully"
+msgstr ""
+
+msgid "Failed to submit fee"
+msgstr ""
+
+msgid "Student not found"
+msgstr ""
+
+msgid "Invalid submission ID"
+msgstr ""
+
+msgid "Academy PayFlow Settings"
+msgstr ""
+
+msgid "Webhook Secret Key"
+msgstr ""
+
+msgid "Bank Name"
+msgstr ""
+
+msgid "Webhook URL"
+msgstr ""
+
+msgid "Use this URL to configure your SMS forwarder app:"
+msgstr ""
+
+msgid "PayFlow Portal"
+msgstr ""
