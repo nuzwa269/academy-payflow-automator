@@ -1,0 +1,15 @@
+# Composer
+/vendor/
+
+# Node modules
+/node_modules/
+
+# IDE
+*.ide
+
+# Logs
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db

@@ -1,3 +1,28 @@
 # Academy PayFlow Automator
 
-The Academy PayFlow Automator is a WordPress plugin designed to streamline payment processes and manage financial transactions efficiently. This plugin integrates seamlessly with various payment gateways, enabling users to automate billing, invoicing, and payment tracking. With its user-friendly interface, developers and site administrators can easily customize settings to meet their financial needs. Whether you're running an online course, a subscription service, or a membership site, the Academy PayFlow Automator ensures smooth and reliable payment management for your WordPress website.
+This project contains the complete plugin structure for the Academy PayFlow Automator.
+
+## Installation
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/nuzwa269/academy-payflow-automator.git
+   ```
+2. Navigate to the project directory:
+   ```bash
+   cd academy-payflow-automator
+   ```
+3. Install dependencies:
+   ```bash
+   composer install
+   npm install
+   ```
+
+## Usage
+
+1. Activate the plugin in your WordPress dashboard.
+2. Configure the settings as per your requirements.
+
+## Contributing
+
+Feel free to submit pull requests and report issues!
