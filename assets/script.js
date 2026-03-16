@@ -126,15 +126,25 @@ console.log('PayFlow Automator script loaded!');
 
         load: function () {
             if (!AJAX_URL) return;
+            // Disable submit until student data loads
+            $('#fee-submission-form [type="submit"]').prop('disabled', true).text('Loading…');
             $.post(AJAX_URL, { action: 'apfa_get_student_data', nonce: NONCE }, function (res) {
                 if (res.success) {
                     StudentData.data = res.data;
                     StudentData.populate(res.data);
+                    // Re-enable submit if student is linked
+                    if (res.data && res.data.phone) {
+                        $('#fee-submission-form [type="submit"]').prop('disabled', false).text('Submit Payment');
+                    } else {
+                        $('#fee-submission-form [type="submit"]').text('Account not linked — contact admin');
+                    }
                 } else {
                     Utils.log('Student not found or not logged in');
+                    $('#fee-submission-form [type="submit"]').text('Log in to submit payment');
                 }
             }).fail(function () {
                 Utils.error('Failed to load student data');
+                $('#fee-submission-form [type="submit"]').prop('disabled', false).text('Submit Payment');
             });
         },
 
@@ -281,12 +291,17 @@ console.log('PayFlow Automator script loaded!');
                 return;
             }
 
-            var formData = new FormData($form[0]);
+            // Build FormData from scratch to avoid duplicate field keys
+            var formData = new FormData();
             formData.append('action', 'apfa_submit_fee');
             formData.append('nonce', NONCE || $('#apfa-nonce').val());
             formData.append('student_phone', studentPhone);
             formData.append('trx_id', trxId);
             formData.append('amount', amount);
+            var receiptFile = $('#receipt-image')[0].files[0];
+            if (receiptFile) {
+                formData.append('receipt_image', receiptFile);
+            }
 
             $btn.prop('disabled', true).text('Submitting…');
             $msg.html('');

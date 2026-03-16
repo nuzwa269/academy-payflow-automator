@@ -9,12 +9,13 @@ class APFA_Webhook_Listener {
         add_action( 'rest_api_init', array( $this, 'register_webhook_endpoint' ) );
         add_action( 'wp_ajax_apfa_submit_fee', array( $this, 'handle_fee_submission' ) );
         add_action( 'wp_ajax_nopriv_apfa_submit_fee', array( $this, 'handle_fee_submission' ) );
+        // nopriv variants return a proper JSON error instead of WordPress's raw "0" response
         add_action( 'wp_ajax_apfa_get_student_data', array( $this, 'get_student_data' ) );
         add_action( 'wp_ajax_nopriv_apfa_get_student_data', array( $this, 'get_student_data' ) );
         add_action( 'wp_ajax_apfa_get_transactions', array( $this, 'get_transactions' ) );
         add_action( 'wp_ajax_nopriv_apfa_get_transactions', array( $this, 'get_transactions' ) );
+        // download_receipt requires login to enforce ownership
         add_action( 'wp_ajax_apfa_download_receipt', array( $this, 'download_receipt' ) );
-        add_action( 'wp_ajax_nopriv_apfa_download_receipt', array( $this, 'download_receipt' ) );
     }
 
     public function register_webhook_endpoint() {
@@ -237,11 +238,36 @@ class APFA_Webhook_Listener {
     public function download_receipt() {
         check_ajax_referer( 'apfa_nonce', 'nonce' );
 
+        $current_user_id = get_current_user_id();
+        if ( ! $current_user_id ) {
+            wp_send_json_error( __( 'Not logged in', 'apfa' ) );
+        }
+
         $submission_id = isset( $_GET['submission_id'] ) ? intval( $_GET['submission_id'] ) : 0;
         $language      = isset( $_GET['lang'] ) ? sanitize_text_field( $_GET['lang'] ) : 'en';
 
         if ( ! $submission_id ) {
             wp_send_json_error( __( 'Invalid submission ID', 'apfa' ) );
+        }
+
+        global $wpdb;
+        $prefix = $wpdb->prefix . 'apfa_';
+
+        // Verify the submission belongs to the current user's student record
+        $student = $wpdb->get_row( $wpdb->prepare(
+            "SELECT Phone FROM {$prefix}students WHERE User_ID = %d", $current_user_id
+        ) );
+        if ( $student ) {
+            $owns = $wpdb->get_var( $wpdb->prepare(
+                "SELECT ID FROM {$prefix}fee_submissions WHERE ID = %d AND Student_Phone = %s",
+                $submission_id,
+                $student->Phone
+            ) );
+            if ( ! $owns && ! current_user_can( 'manage_options' ) ) {
+                wp_send_json_error( __( 'Access denied', 'apfa' ) );
+            }
+        } elseif ( ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( __( 'Student record not found', 'apfa' ) );
         }
 
         require_once APFA_PLUGIN_DIR . 'includes/vendor/class-pdf-generator.php';

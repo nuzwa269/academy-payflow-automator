@@ -141,7 +141,7 @@ class APFA_Admin_Settings {
         $inserted = $wpdb->insert(
             $prefix . 'students',
             array(
-                'User_ID'     => $user_id ?: null,
+                'User_ID'     => $user_id > 0 ? $user_id : null,
                 'Full_Name'   => $full_name,
                 'Phone'       => $phone,
                 'Course_Name' => $course_name,
@@ -227,13 +227,22 @@ class APFA_Admin_Settings {
             array( '%d' )
         );
 
-        // Deduct balance when manually verifying
+        // Deduct balance when manually verifying (only if student exists and balance won't go negative)
         if ( 'Verified' === $status && 'Verified' !== $submission->Status ) {
-            $wpdb->query( $wpdb->prepare(
-                "UPDATE {$prefix}students SET Balance = Balance - %f WHERE Phone = %s",
-                $submission->Submitted_Amount,
+            $student = $wpdb->get_row( $wpdb->prepare(
+                "SELECT ID, Balance FROM {$prefix}students WHERE Phone = %s",
                 $submission->Student_Phone
             ) );
+            if ( $student ) {
+                $new_balance = max( 0, (float) $student->Balance - (float) $submission->Submitted_Amount );
+                $wpdb->update(
+                    $prefix . 'students',
+                    array( 'Balance' => $new_balance ),
+                    array( 'ID' => $student->ID ),
+                    array( '%f' ),
+                    array( '%d' )
+                );
+            }
         }
 
         wp_send_json_success( array( 'message' => __( 'Status updated', 'apfa' ) ) );
@@ -737,8 +746,8 @@ class APFA_Admin_Settings {
                     <tr>
                         <th scope="row"><label for="webhook_secret"><?php _e( 'Webhook Secret Key', 'apfa' ); ?></label></th>
                         <td>
-                            <input type="text" name="apfa_webhook_secret" id="webhook_secret"
-                                value="<?php echo esc_attr( get_option( 'apfa_webhook_secret' ) ); ?>" class="regular-text" />
+                            <input type="password" name="apfa_webhook_secret" id="webhook_secret"
+                                value="<?php echo esc_attr( get_option( 'apfa_webhook_secret' ) ); ?>" class="regular-text" autocomplete="off" />
                             <p class="description"><?php _e( 'Used to authenticate incoming SMS webhook requests.', 'apfa' ); ?></p>
                         </td>
                     </tr>
