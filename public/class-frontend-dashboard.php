@@ -15,32 +15,24 @@ class APFA_Frontend_Dashboard {
         global $post;
         
         if ( is_page( 'payflow-portal' ) && ! is_admin() ) {
-            remove_all_actions( 'wp_head' );
-            remove_all_actions( 'wp_footer' );
-            
-            include APFA_PLUGIN_DIR . 'public/dashboard-template.php';
+            include APFA_PLUGIN_DIR . 'public/dashboard-template-new.php';
             exit;
         }
     }
 
     public function render_dashboard() {
         ob_start();
-        include APFA_PLUGIN_DIR . 'public/dashboard-template.php';
+        include APFA_PLUGIN_DIR . 'public/dashboard-template-new.php';
         return ob_get_clean();
     }
 
     public function enqueue_assets() {
         if ( is_page( 'payflow-portal' ) ) {
-            wp_enqueue_style( 'apfa-dashboard', APFA_PLUGIN_URL . 'public/dashboard.css', array(), APFA_VERSION );
-            
-            if ( 'ur' === substr( get_locale(), 0, 2 ) ) {
-                wp_enqueue_style( 'apfa-dashboard-urdu', APFA_PLUGIN_URL . 'public/dashboard-urdu.css', array( 'apfa-dashboard' ), APFA_VERSION );
-            }
+            wp_enqueue_style( 'apfa-dashboard', APFA_PLUGIN_URL . 'assets/style.css', array(), APFA_VERSION );
             
             wp_enqueue_script( 'apfa-datatables', 'https://cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js', array( 'jquery' ), '1.13.1', true );
             wp_enqueue_style( 'apfa-datatables', 'https://cdn.datatables.net/1.13.1/css/jquery.dataTables.min.css' );
-            wp_enqueue_script( 'apfa-dashboard', APFA_PLUGIN_URL . 'public/dashboard.js', array( 'jquery', 'apfa-datatables' ), APFA_VERSION, true );
-            wp_enqueue_script( 'apfa-language-switcher', APFA_PLUGIN_URL . 'public/language-switcher.js', array( 'jquery' ), APFA_VERSION, true );
+            wp_enqueue_script( 'apfa-dashboard', APFA_PLUGIN_URL . 'assets/script.js', array( 'jquery', 'apfa-datatables' ), APFA_VERSION, true );
 
             wp_localize_script( 'apfa-dashboard', 'apfaConfig', array(
                 'ajax_url' => admin_url( 'admin-ajax.php' ),

@@ -20,8 +20,8 @@
 
             <nav class="main-nav">
                 <a href="#dashboard" class="nav-link active" data-section="dashboard" onclick="switchSection(event, 'dashboard')">Dashboard</a>
-                <a href="#transactions" class="nav-link" data-section="submit-fee" onclick="switchSection(event, 'submit-fee')">Transactions</a>
-                <a href="#reports" class="nav-link" data-section="history" onclick="switchSection(event, 'history')">Reports</a>
+                <a href="#transactions" class="nav-link" data-section="history" onclick="switchSection(event, 'history')">Transactions</a>
+                <a href="#reports" class="nav-link" data-section="profile" onclick="switchSection(event, 'profile')">Reports</a>
             </nav>
 
             <div class="header-actions">
@@ -242,26 +242,11 @@
         <div class="modal-icon">✓</div>
         <h2>Payment Submitted</h2>
         <p>Your payment has been submitted for verification</p>
-        <button class="btn btn-blue" onclick="closeModal()">Done</button>
+        <button class="btn btn-blue" onclick="closeModal('success-modal')">Done</button>
     </div>
 </div>
 
 <?php wp_footer(); ?>
-
-<script>
-function switchSection(e, section) {
-    e.preventDefault();
-    document.querySelectorAll('.dashboard-section').forEach(s => s.classList.remove('active'));
-    document.getElementById(section).classList.add('active');
-    
-    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-    event.target.classList.add('active');
-}
-
-function closeModal() {
-    document.getElementById('success-modal').classList.remove('show');
-}
-</script>
 
 </body>
 </html>
