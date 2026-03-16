@@ -1,0 +1,3 @@
+# Academy PayFlow Automator
+
+The Academy PayFlow Automator is a WordPress plugin designed to streamline payment processes and manage financial transactions efficiently. This plugin integrates seamlessly with various payment gateways, enabling users to automate billing, invoicing, and payment tracking. With its user-friendly interface, developers and site administrators can easily customize settings to meet their financial needs. Whether you're running an online course, a subscription service, or a membership site, the Academy PayFlow Automator ensures smooth and reliable payment management for your WordPress website.
