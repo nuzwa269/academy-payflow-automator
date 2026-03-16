@@ -1,5 +1,146 @@
-msgid "Hello"
-msgstr "ہیلو"
+# Academy PayFlow Automator - اردو ترجمہ
+# Copyright (C) 2026 Coach Pro AI
+msgid ""
+msgstr ""
+"Project-Id-Version: Academy PayFlow Automator 1.0.0\n"
+"POT-Creation-Date: 2026-03-16 00:00:00+0000\n"
+"PO-Revision-Date: 2026-03-16 00:00:00+0000\n"
+"Language: ur_PK\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
 
-msgid "Goodbye"
-msgstr "الوداع"
+msgid "Dashboard"
+msgstr "ڈیش بورڈ"
+
+msgid "Submit Fee"
+msgstr "فیس جمع کریں"
+
+msgid "History"
+msgstr "تاریخ"
+
+msgid "Profile"
+msgstr "پروفائل"
+
+msgid "Welcome Back"
+msgstr "خوش آمدید"
+
+msgid "Monitor your academy fee payment status"
+msgstr "اپنی اکادیمی فیس کی ادائیگی کی حالت کی نگرانی کریں"
+
+msgid "Total Fee"
+msgstr "کل فیس"
+
+msgid "Verified Payments"
+msgstr "تصدیق شدہ ادائیگیاں"
+
+msgid "Pending Balance"
+msgstr "زیر التوا بیلنس"
+
+msgid "Recent Transactions"
+msgstr "حالیہ لین دین"
+
+msgid "Date"
+msgstr "تاریخ"
+
+msgid "Transaction ID"
+msgstr "ٹرانزیکشن ID"
+
+msgid "Amount"
+msgstr "رقم"
+
+msgid "Status"
+msgstr "حالت"
+
+msgid "Submit Your Payment"
+msgstr "اپنی ادائیگی جمع کریں"
+
+msgid "Enter your transaction details"
+msgstr "اپنی ٹرانزیکشن کی تفصیلات درج کریں"
+
+msgid "Amount (PKR)"
+msgstr "رقم (روپے)"
+
+msgid "Receipt Screenshot"
+msgstr "رسید کی تصویر"
+
+msgid "Click to upload or drag & drop"
+msgstr "اپ لوڈ کرنے کے لیے کلک کریں یا ڈریگ کریں"
+
+msgid "Submit Payment"
+msgstr "ادائیگی جمع کریں"
+
+msgid "Payment History"
+msgstr "ادائیگی کی تاریخ"
+
+msgid "All your submitted payments"
+msgstr "آپ کی تمام جمع کردہ ادائیگیاں"
+
+msgid "Receipt"
+msgstr "رسید"
+
+msgid "Student Profile"
+msgstr "طالب علم کی پروفائل"
+
+msgid "Your course information"
+msgstr "آپ کی کورس کی معلومات"
+
+msgid "Name"
+msgstr "نام"
+
+msgid "Phone"
+msgstr "فون"
+
+msgid "Course"
+msgstr "کورس"
+
+msgid "Enrolled"
+msgstr "داخل"
+
+msgid "Payment Submitted"
+msgstr "ادائیگی جمع"
+
+msgid "Your payment has been submitted for verification."
+msgstr "آپ کی ادائیگی تصدیق کے لیے جمع ہو گئی ہے۔"
+
+msgid "Done"
+msgstr "ہو گیا"
+
+msgid "Powered by Academy PayFlow | Designed by Coach Pro AI"
+msgstr "Academy PayFlow کی طرف سے | Coach Pro AI کے ذریعے ڈیزائن کیا گیا"
+
+msgid "Invalid input data"
+msgstr "غلط ڈیٹا"
+
+msgid "Failed to upload receipt image"
+msgstr "رسید کی تصویر اپ لوڈ کرنے میں ناکام"
+
+msgid "Fee submitted successfully"
+msgstr "فیس کامیابی سے جمع ہو گئی"
+
+msgid "Failed to submit fee"
+msgstr "فیس جمع کرنے میں ناکام"
+
+msgid "Student not found"
+msgstr "طالب علم نہیں ملا"
+
+msgid "Invalid submission ID"
+msgstr "غلط جمع کنندہ ID"
+
+msgid "Academy PayFlow Settings"
+msgstr "Academy PayFlow سیٹنگز"
+
+msgid "Webhook Secret Key"
+msgstr "Webhook خفیہ کلید"
+
+msgid "Bank Name"
+msgstr "بینک کا نام"
+
+msgid "Webhook URL"
+msgstr "Webhook URL"
+
+msgid "Use this URL to configure your SMS forwarder app:"
+msgstr "اپنی SMS forwarder ایپ کو کنفیگر کرنے کے لیے اس URL کو استعمال کریں:"
+
+msgid "PayFlow Portal"
+msgstr "PayFlow پورٹل"
