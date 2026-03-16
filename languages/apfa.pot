@@ -1,0 +1,3 @@
+# Translation template
+
+This file contains all msgid strings used in the project.

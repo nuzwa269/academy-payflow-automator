@@ -1,0 +1,5 @@
+msgid "Hello"
+msgstr "ہیلو"
+
+msgid "Goodbye"
+msgstr "الوداع"
