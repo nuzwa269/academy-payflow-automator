@@ -230,7 +230,7 @@ class APFA_Admin_Settings {
         // Deduct balance when manually verifying (only if student exists and balance won't go negative)
         if ( 'Verified' === $status && 'Verified' !== $submission->Status ) {
             $student = $wpdb->get_row( $wpdb->prepare(
-                "SELECT ID, Balance FROM {$prefix}students WHERE Phone = %s",
+                "SELECT ID, Balance, Full_Name, User_ID FROM {$prefix}students WHERE Phone = %s",
                 $submission->Student_Phone
             ) );
             if ( $student ) {
@@ -242,10 +242,50 @@ class APFA_Admin_Settings {
                     array( '%f' ),
                     array( '%d' )
                 );
+
+                // Email the student about the manual verification.
+                $this->notify_student_verified( $submission, $student );
             }
         }
 
         wp_send_json_success( array( 'message' => __( 'Status updated', 'apfa' ) ) );
+    }
+
+    /**
+     * Send a confirmation email to the student when their payment is manually verified.
+     *
+     * @param object $submission  Row from apfa_fee_submissions.
+     * @param object $student     Row from apfa_students (must include User_ID, Full_Name).
+     */
+    private function notify_student_verified( $submission, $student ) {
+        if ( ! $student->User_ID ) {
+            return;
+        }
+        $user = get_userdata( (int) $student->User_ID );
+        if ( ! $user || ! $user->user_email ) {
+            return;
+        }
+
+        $site_name  = get_bloginfo( 'name' );
+        $amount_fmt = number_format( (float) $submission->Submitted_Amount, 2 );
+
+        /* translators: Email subject — 1: site name */
+        $subject = sprintf( __( '[%s] Your Payment Has Been Verified', 'apfa' ), $site_name );
+
+        $body  = sprintf( __( 'Dear %s,', 'apfa' ), sanitize_text_field( $student->Full_Name ) ) . "\n\n";
+        $body .= __( 'Great news! Your fee payment has been successfully verified.', 'apfa' ) . "\n\n";
+        $body .= __( 'Payment Details:', 'apfa' ) . "\n";
+        $body .= sprintf( __( '  • Transaction ID : %s', 'apfa' ), $submission->Trx_ID ) . "\n";
+        $body .= sprintf( __( '  • Amount         : PKR %s', 'apfa' ), $amount_fmt ) . "\n";
+        $body .= sprintf( __( '  • Status         : %s', 'apfa' ), __( 'Verified', 'apfa' ) ) . "\n\n";
+        $body .= sprintf(
+            /* translators: URL to the PayFlow portal */
+            __( 'You can view and download your receipt from the portal: %s', 'apfa' ),
+            home_url( '/payflow-portal/' )
+        ) . "\n\n";
+        $body .= sprintf( __( 'Thank you,\n%s', 'apfa' ), $site_name );
+
+        wp_mail( $user->user_email, $subject, $body );
     }
 
     public function ajax_get_stats() {

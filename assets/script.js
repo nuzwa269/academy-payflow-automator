@@ -209,16 +209,29 @@ console.log('PayFlow Automator script loaded!');
             }
 
             $.each(submissions, function (i, sub) {
-                var receipt = sub.receipt
-                    ? '<a href="' + sub.receipt + '" target="_blank">View</a>'
-                    : '—';
+                var receiptCells = '';
+
+                if ('Verified' === sub.status) {
+                    // Build the download URL for the HTML receipt.
+                    var downloadUrl = AJAX_URL
+                        + '?action=apfa_download_receipt'
+                        + '&submission_id=' + encodeURIComponent(sub.id)
+                        + '&nonce=' + encodeURIComponent(NONCE);
+                    receiptCells = '<a href="' + downloadUrl + '" target="_blank" '
+                        + 'style="background:#10b981;color:#fff;padding:3px 10px;border-radius:6px;font-size:12px;text-decoration:none;">'
+                        + '⬇ Receipt</a>';
+                } else if (sub.receipt) {
+                    receiptCells = '<a href="' + sub.receipt + '" target="_blank">View</a>';
+                } else {
+                    receiptCells = '—';
+                }
 
                 var row = '<tr>' +
                     '<td>' + sub.date + '</td>' +
                     '<td><code>' + (sub.trx_id || '—') + '</code></td>' +
                     '<td>' + Utils.formatCurrency(sub.amount) + '</td>' +
                     '<td>' + Transactions.statusBadge(sub.status) + '</td>' +
-                    '<td>' + receipt + '</td>' +
+                    '<td>' + receiptCells + '</td>' +
                     '</tr>';
 
                 rows += row;
