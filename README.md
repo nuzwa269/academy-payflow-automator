@@ -1,28 +1,16 @@
 # Academy PayFlow Automator
 
-This project contains the complete plugin structure for the Academy PayFlow Automator.
+This plugin automates payment processes and enhances user experience by providing a robust set of features.
 
 ## Installation
+1. Upload the plugin files to the `/wp-content/plugins/` directory.
+2. Activate the plugin through the 'Plugins' menu in WordPress.
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/nuzwa269/academy-payflow-automator.git
-   ```
-2. Navigate to the project directory:
-   ```bash
-   cd academy-payflow-automator
-   ```
-3. Install dependencies:
-   ```bash
-   composer install
-   npm install
-   ```
+## Features
+- Automated payment processing
+- User management
+- Custom dashboard
 
-## Usage
-
-1. Activate the plugin in your WordPress dashboard.
-2. Configure the settings as per your requirements.
-
-## Contributing
-
-Feel free to submit pull requests and report issues!
+## Changelog
+### v1.0.0
+- Initial release of the plugin.

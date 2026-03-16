@@ -1,0 +1,7 @@
+// Translation file (PO format)
+
+msgid "Automated Payments"
+msgstr "Обработанные платежи"
+
+msgid "User Management"
+msgstr "Управление пользователями"
